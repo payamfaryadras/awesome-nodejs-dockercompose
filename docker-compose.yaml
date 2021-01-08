@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  authservice:
+    build: .
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mysql
+    networks:
+      - backend
+  mysql:
+    image: mysql:5.7
+    container_name: mysql_service
+    env_file:
+      - ./.env
+    volumes:
+      - ./data/db:/var/lib/mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        MYSQL_DATABASE: ${DB_NAME}
+        MYSQL_USER: ${DB_USER}
+        MYSQL_PASSWORD: ${DB_USER_PASSWORD}
+    networks:
+      - backend
+  phpmyadmin:
+        image: phpmyadmin/phpmyadmin:4.7
+        depends_on:
+          - mysql
+        ports:
+          - "30002:80"
+        environment:
+         PMA_HOST: mysql
+         MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        restart: always
+        volumes:
+          - /sessions
+        container_name: php_my_admin_service
+        networks:
+          - backend
+networks:
+    backend:
